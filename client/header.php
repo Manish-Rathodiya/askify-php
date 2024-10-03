@@ -11,24 +11,24 @@
                     <a class="nav-link active" aria-current="page" href="./">Home</a>
                 </li>
                 <?php if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) { ?>
-                <li class="nav-item">
-                    <a class="nav-link active" href="?login=true">Login</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="?signup=true">Sign Up</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="?login=true">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="?signup=true">Sign Up</a>
+                    </li>
                 <?php } else { ?>
 
-                <li class="nav-item">
-                    <a class="nav-link active" href="../server/requests.php?logout=true">Log Out
-                        (<?php echo $_SESSION['name']; ?>)</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="?ask=true">Ask A Question</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="?u-id=<?php echo $_SESSION['user_id']; ?>">My Questions</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="../server/requests.php?logout=true">Log Out
+                            (<?php echo $_SESSION['name']; ?>)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="?ask=true">Ask A Question</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="?u-id=<?php echo $_SESSION['user_id']; ?>">My Questions</a>
+                    </li>
                 <?php } ?>
                 <li class="nav-item">
                     <a class="nav-link active" href="#">Category</a>

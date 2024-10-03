@@ -1,3 +1,5 @@
+<?php session_start(); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +12,6 @@
 
 <body>
     <?php
-    session_start();
     include '../client/header.php';
     $loggedIn = isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true;
 
