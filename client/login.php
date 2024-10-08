@@ -1,16 +1,9 @@
-<?php
-$err_msg = isset($_SESSION['err_msg']) ? $_SESSION['err_msg'] : '';
-unset($_SESSION['err_msg']);
-?>
 <div class="container login">
     <h1 class="heading">Login</h1>
-    <?php
-    if ($err_msg) { ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <strong> <?php echo $err_msg ?> </strong>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    <?php } ?>
+
+    <?php include '../server/requests.php';
+    displayMessage(); ?>
+
     <form action="../server/requests.php" method="post">
 
         <div class="col-6 offset-sm-3 mb">

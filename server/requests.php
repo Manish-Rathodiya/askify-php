@@ -1,29 +1,49 @@
 <?php
 include "../common/db.php";
-session_start();
-$success_msg = false;
-$err_msg = false;
+// Check if a session is already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-//Message with redirection
-function redirectWithSuccess($url, $successMessage)
+//Message with redirect
+function redirectWithMessage($url, $message, $type)
 {
-    $_SESSION['success_msg'] = $successMessage;
+    if ($type === 'success') {
+        $_SESSION['success_msg'] = $message;
+    } else {
+        $_SESSION['err_msg'] = $message;
+    }
     header("location: $url");
     exit();
 }
-function redirectWithError($url, $errorMessage)
+
+function displayMessage()
 {
-    $_SESSION['err_msg'] = $errorMessage;
-    header("location: $url");
-    exit();
+    if (isset($_SESSION['success_msg']) && !empty($_SESSION['success_msg'])) {
+        $message = $_SESSION['success_msg'];
+        echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <strong>' . htmlspecialchars($message) . '</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+        unset($_SESSION['success_msg']); // Clear the message after displaying
+    } elseif (isset($_SESSION['err_msg']) && !empty($_SESSION['err_msg'])) {
+        $message = $_SESSION['err_msg'];
+        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong>' . htmlspecialchars($message) . '</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>';
+        unset($_SESSION['err_msg']); // Clear the message after displaying
+    }
 }
+
 
 function registerUser($conn, $username, $email, $password, $place)
 {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     if (!empty($username) && !empty($email) && !empty($hashed_password) && !empty($place)) {
-        $signup = $conn->prepare("INSERT INTO `users` (`username`, `email`, `password`, `place`) VALUES (:username, :email, :password, :place)");
+        $signup = $conn->prepare("INSERT INTO `users` (`username`, `email`, `password`, `place`) VALUES (:username, :email,
+:password, :place)");
 
         $signup->bindValue(':username', $username, PDO::PARAM_STR);
         $signup->bindValue(':email', $email, PDO::PARAM_STR);
@@ -59,8 +79,7 @@ function verifyLogin($conn, $email, $password)
     if (!password_verify($password, $user['password'])) {
         return "Incorrect password";
     }
-
-    return $user;  //Valid user
+    return $user; //Valid user
 }
 
 function loginUser($user)
@@ -69,11 +88,28 @@ function loginUser($user)
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['name'] = $user['username'];
     $success_msg = "Login Succesfully";
-    redirectWithSuccess('/askify/server', $success_msg);
+    redirectWithMessage('/askify/server', $success_msg, 'success');
     exit();
 }
 
-//Sign Up 
+function ask($conn, $title, $description, $category_id, $user_id)
+{
+
+    if (!empty($title) && !empty($description) && !empty($category_id) && !empty($user_id)) {
+        $question = $conn->prepare("INSERT INTO `questions` (`title`, `description`, `category_id`, `user_id`) VALUES (:title,
+:description, :category_id, :user_id)");
+
+        $question->bindValue(':title', $title, PDO::PARAM_STR);
+        $question->bindValue(':description', $description, PDO::PARAM_STR);
+        $question->bindValue(':category_id', $category_id, PDO::PARAM_INT);
+        $question->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+        $result = $question->execute();
+        $id = $conn->lastInsertId();
+        return ['result'->$result, 'id'->$id];
+    }
+}
+
+//Sign Up
 if (isset($_POST['signup'])) {
     $username = trim($_POST['username']);
     $email = trim($_POST['email']);
@@ -87,9 +123,9 @@ if (isset($_POST['signup'])) {
         $_SESSION['user_id'] = $result;
         $_SESSION['name'] = $username;
         $success_msg = 'Registration Successfull';
-        redirectWithSuccess('/askify/server', $success_msg);
+        redirectWithMessage('/askify/server', $success_msg, 'success');
     } else {
-        redirectWithError('/askify/server/?signup=true', $result);
+        redirectWithMessage('/askify/server/?signup=true', $result, 'error');
     }
 
     //Login
@@ -103,9 +139,10 @@ if (isset($_POST['signup'])) {
     if (is_array($result)) {
         loginUser($result);
     } else {
-        redirectWithError('/askify/server/?login=true', $result);
+        redirectWithMessage('/askify/server/?login=true', $result, 'error');
     }
 
+    //Log out
 } else if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
@@ -119,31 +156,19 @@ if (isset($_POST['signup'])) {
     $category_id = trim($_POST['category_id']);
     $user_id = trim($_SESSION['user_id']);
 
-    if (!empty($title) && !empty($description) && !empty($category_id) && !empty($user_id)) {
-        $question = $conn->prepare("INSERT INTO `questions` (`title`, `description`, `category_id`, `user_id`) VALUES (:title, :description, :category_id, :user_id)");
+    $result = ask($conn, $title, $description, $category_id, $user_id);
 
-        $question->bindValue(':title', $title, PDO::PARAM_STR);
-        $question->bindValue(':description', $description, PDO::PARAM_STR);
-        $question->bindValue(':category_id', $category_id, PDO::PARAM_INT);
-        $question->bindValue(':user_id', $user_id, PDO::PARAM_INT);
-
-        $result = $question->execute();
-        $id = $conn->lastInsertId();
-
-        if ($result) {
-            $success_msg = "Question Added Successfully";
-            redirectWithSuccess('/askify/server', $success_msg);
-        } else {
-            $err_msg = "Question not added";
-            redirectWithError('/askify/server', $err_msg);
-        }
+    if ($result) {
+        $success_msg = "Question Added Successfully";
+        redirectWithMessage('/askify/server', $success_msg, 'success');
     } else {
-        $err_msg = "All fields are mandatory";
-        redirectWithError('/askify/server', $err_msg);
+        $err_msg = "Question not added";
+        redirectWithMessage('/askify/server', $err_msg, 'error');
     }
+}
 
-    //Answer a question
-} else if (isset($_POST['answer'])) {
+//Answer a question
+else if (isset($_POST['answer'])) {
     $answer = trim($_POST['answer']);
     $question_id = trim($_POST['question_id']);
     $user_id = trim($_SESSION['user_id']);
@@ -154,13 +179,15 @@ if (isset($_POST['signup'])) {
 
         if ($result) {
             $success_msg = "Answer submitted successfully";
-            redirectWithSuccess("/askify/server?q-id=$question_id", $success_msg);
+            redirectWithMessage("/askify/server?q-id=$question_id", $success_msg, 'success');
         } else {
             $err_msg = "Answer is not submitted";
+            redirectWithMessage('/askify/server', $err_msg, 'error');
         }
 
     } else {
         $err_msg = "All fields are mandatory";
+        redirectWithMessage('/askify/server', $err_msg, 'error');
     }
 
     //Delete my question
@@ -170,8 +197,9 @@ if (isset($_POST['signup'])) {
     $result = $delete->execute([$qid]);
     if ($result) {
         $success_msg = "Question deleted successfully";
-        redirectWithSuccess('./', $success_msg);
+        redirectWithMessage('./', $success_msg, 'success');
     } else {
         $err_msg = "Question not deleted";
+        redirectWithMessage('./', $err_msg, 'error');
     }
 }
