@@ -16,7 +16,7 @@
         <div class="col-6 offset-sm-3 mb">
             <label for="password" class="form-label">Password</label>
             <input type="password" class="form-control" id="password" name="password" placeholder="enter password"
-                required>
+                minlength="3" required>
         </div>
         <div class="col-6 offset-sm-3 mb">
             <label for="place" class="form-label">Place</label>

@@ -13,7 +13,7 @@
         <div class="col-6 offset-sm-3 mb">
             <label for="password" class="form-label">Password</label>
             <input type="password" class="form-control" id="password" name="password" placeholder="enter password"
-                required>
+                minlength="3" required>
         </div>
         <button type="submit" name="login" class="btn btn-primary offset-sm-3 mb">Login</button>
     </form>

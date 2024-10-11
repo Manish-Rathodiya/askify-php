@@ -21,14 +21,14 @@ function displayMessage()
 {
     if (isset($_SESSION['success_msg']) && !empty($_SESSION['success_msg'])) {
         $message = $_SESSION['success_msg'];
-        echo '<div class="alert alert-success alert-dismissible fade show" role="alert">
+        echo '<div class="alert bg-success text-white alert-dismissible fade show" role="alert">
     <strong>' . htmlspecialchars($message) . '</strong>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
         unset($_SESSION['success_msg']); // Clear the message after displaying
     } elseif (isset($_SESSION['err_msg']) && !empty($_SESSION['err_msg'])) {
         $message = $_SESSION['err_msg'];
-        echo '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+        echo '<div class="alert bg-danger text-white alert-dismissible fade show" role="alert">
     <strong>' . htmlspecialchars($message) . '</strong>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
