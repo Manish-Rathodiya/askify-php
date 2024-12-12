@@ -6,7 +6,7 @@ $dbname = "project_1";
 
 // Create connection
 try {
-    $conn = new PDO("mysql:servername=$servername;dbname=$dbname", $dbusername, $password);
+    $conn = new PDO("mysql:host=$servername;dbname=$dbname", $dbusername, $password);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     // echo "Connection Done!";
 }

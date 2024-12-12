@@ -7,11 +7,12 @@ displayMessage(); ?>
         <div class="col-8">
             <h1 class="heading">Questions</h1>
             <?php include "../common/db.php";
-            $questions = $conn->prepare("SELECT * FROM questions WHERE id = ?");
+            // $questions = $conn->prepare("SELECT * FROM questions WHERE id = ?");
+            $questions = $conn->prepare("SELECT * FROM questions JOIN users ON questions.user_id = users.id WHERE questions.id = ?");
             $questions->execute([$qid]);
             $row = $questions->fetch(PDO::FETCH_ASSOC);
             $cid = $row['category_id'];
-            echo "<h4 class='question-title mb'> Question: " . $row['title'] . "</h4><p>" . $row['description'] . "</p>";
+            echo "<h5>" . $row['username'] . "</h5><h4 class='question-title mb'> Question: " . $row['title'] . "</h4><p>" . $row['description'] . "</p>";
             include "../client/answers.php";
             ?>
             <form action="../server/requests.php" method="post">

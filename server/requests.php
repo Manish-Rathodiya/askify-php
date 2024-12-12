@@ -28,7 +28,7 @@ function displayMessage()
         unset($_SESSION['success_msg']); // Clear the message after displaying
     } elseif (isset($_SESSION['err_msg']) && !empty($_SESSION['err_msg'])) {
         $message = $_SESSION['err_msg'];
-        echo '<div class="alert bg-danger text-white alert-dismissible fade show" role="alert">
+        echo '<div class="alert bg-danger text-white  alert-dismissible fade show" role="alert">
     <strong>' . htmlspecialchars($message) . '</strong>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>';
@@ -105,7 +105,13 @@ function ask($conn, $title, $description, $category_id, $user_id)
         $question->bindValue(':user_id', $user_id, PDO::PARAM_INT);
         $result = $question->execute();
         $id = $conn->lastInsertId();
-        return ['result'->$result, 'id'->$id];
+
+        // $connid = $conn->lastInsertId(); 
+        // $idObj = new stdClass(); 
+        // $idObj->property = $connid; 
+        return ['result' => $result, 'id' => $id];
+        // return ['result'->$result, 'id'->$id];
+
     }
 }
 
@@ -193,9 +199,20 @@ else if (isset($_POST['answer'])) {
     //Delete my question
 } else if (isset($_GET['delete'])) {
     $qid = $_GET['delete'];
-    $delete = $conn->prepare("DELETE FROM questions WHERE id=?");
-    $result = $delete->execute([$qid]);
-    if ($result) {
+
+    //Start the transaction 
+    $conn->beginTransaction();
+
+    // Prepare and execute the delete query for the answers table 
+    $deleteAnswers = $conn->prepare("DELETE FROM answers WHERE question_id = ?");
+    $deleteAnswers->execute([$qid]);
+
+    // Prepare and execute the delete query for the questions table 
+    $deleteQuestions = $conn->prepare("DELETE FROM questions WHERE id = ?");
+    $deleteQuestions->execute([$qid]);
+
+    // Commit the transaction 
+    if ($conn->commit() === true) {
         $success_msg = "Question deleted successfully";
         redirectWithMessage('./', $success_msg, 'success');
     } else {

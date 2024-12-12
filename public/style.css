@@ -58,10 +58,18 @@ nav a:hover {
 }
 
 .row a {
-    transition: text-shadow 0.3s ease, transform 0.3s ease;
+    transition: text-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .row a:hover {
     text-shadow: 0 0 10px rgb(0, 183, 255);
     transform: scale(1.03);
+    cursor: pointer;
+}
+
+.row .username {
+    text-decoration: none;
+    float: right;
+    color: rgb(0, 183, 255);
+    font-weight: bold;
 }
